@@ -1,0 +1,13 @@
+{
+    "name": "expressif/stream",
+    "description": "evented streams wrapper",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ioan CHIRIAC",
+            "email": "i.chiriac@yahoo.com"
+        }
+    ],
+    "minimum-stability": "beta",
+    "require": {}
+}
