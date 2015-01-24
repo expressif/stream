@@ -37,5 +37,15 @@ namespace Expressif\Stream {
       }
     }
 
+    /**
+     * Closing the current stream
+     */
+    public function close() {
+      $this->emit('close');
+      fclose($this->stream);
+      $this->__destruct();
+      return $this;
+    }
+
   }
 }
