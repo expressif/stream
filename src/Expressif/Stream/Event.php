@@ -7,50 +7,35 @@
 namespace Expressif\Stream {
 
   /**
-   * A tiny event helper
+   * Event wrapper
    */
-  class Event {
-    private $handlers = [];
-    private $forward;
+  class Event extends EventEmitter {
+
+    protected $event;
+    protected $stream;
 
     /**
-     * Forwards events to the specified destination
+     * Initialize a new stream listener
      */
-    public function forward($event, event $dest) {
-      if (!isset($this->forward[$event])) {
-        $this->forward[$event] = [];
-      }
-      $this->forward[$event][] = $dest;
-      return $this;
-    }
-    /**
-     * Listen to the specified event
-     */
-    public function on($event, $fn) {
-      if (!isset($this->handlers[$event])) {
-        $this->handlers[$event] = [];
-      }
-      $this->handlers[$event][] = $fn;
-      return $this;
+    public function __construct($stream) {
+      $this->stream = $stream;
+      stream_set_blocking($this->stream, 0);
+      $this->event = event_new();
+      event_set($this->event, $this->stream, EV_READ | EV_PERSIST, array($this, 'emit'), 'read');
+      event_base_set($this->event, Loop::$instance->base);
+      event_add($this->event);
     }
 
     /**
-     * Emits the specified event
+     * Free from loop
      */
-    public function emit($event, array $args = []) {
-      if (!empty($this->handlers[$event])) {
-        foreach($this->handlers[$event] as $fn) {
-          if (call_user_func_array($fn, $args) === false) {
-            break;
-          }
-        }
+    public function __destruct() {
+      if (!empty($this->event)) {
+        event_del($this->event);
+        event_free($this->event);
+        unset($this->stream, $this->event);
       }
-      if (!empty($this->forward[$event])) {
-        foreach($this->forward[$event] as $dest) {
-          $dest->emit($event, $args);
-        }
-      }
-      return $this;
     }
+
   }
 }
