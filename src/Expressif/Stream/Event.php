@@ -7,47 +7,50 @@
 namespace Expressif\Stream {
 
   /**
-   * Listen on the specified descriptor
+   * A tiny event helper
    */
   class Event {
-    private $fd;
-    private $events = [];
-    /**
-     * Initialise the event with the specified descriptor
-     */
-    public function __construct($fd) {
-      $this->fd = $fd;
-    }
-    public function __destruct() {
-      $this->close();
-    }
+    private $handlers = [];
+    private $forward;
 
     /**
-     * Closing the current stream
+     * Forwards events to the specified destination
      */
-    public function close() {
-      foreach($this->events as $ev) {
-        Loop::$instance->clear($ev);
+    public function forward($event, event $dest) {
+      if (!isset($this->forward[$event])) {
+        $this->forward[$event] = [];
       }
-      if (!feof($this->fd)) {
-        fclose($this->fd);
-      }
-      unset($this->events);
-      unset($this->fd);
-    }
-
-    /**
-     * Listen the read event
-     */
-    public function onRead($fn) {
-      $this->events[] = Loop::$instance->onRead($this->fd, $fn);
+      $this->forward[$event][] = $dest;
       return $this;
     }
     /**
-     * Listen the write event
+     * Listen to the specified event
      */
-    public function onWrite($fn) {
-      $this->events[] = Loop::$instance->onWrite($this->fd, $fn);
+    public function on($event, $fn) {
+      if (!isset($this->handlers[$event])) {
+        $this->handlers[$event] = [];
+      }
+      $this->handlers[$event][] = $fn;
+      return $this;
+    }
+
+    /**
+     * Emits the specified event
+     */
+    public function emit($event, array $args = []) {
+      if (!empty($this->handlers[$event])) {
+        foreach($this->handlers[$event] as $fn) {
+          if (call_user_func_array($fn, $args) === false) {
+            break;
+          }
+        }
+      }
+      if (!empty($this->forward[$event])) {
+        foreach($this->forward[$event] as $dest) {
+          $dest->emit($event, $args);
+        }
+      }
       return $this;
     }
   }
+}
