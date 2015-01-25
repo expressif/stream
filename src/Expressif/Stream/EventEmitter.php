@@ -16,11 +16,8 @@ namespace Expressif\Stream {
     /**
      * Forwards events to the specified destination
      */
-    public function forward($event, event $dest) {
-      if (!isset($this->forward[$event])) {
-        $this->forward[$event] = [];
-      }
-      $this->forward[$event][] = $dest;
+    public function forward(EventEmitter $dest) {
+      $this->forward[] = $dest;
       return $this;
     }
     /**
@@ -45,10 +42,8 @@ namespace Expressif\Stream {
           }
         }
       }
-      if (!empty($this->forward[$event])) {
-        foreach($this->forward[$event] as $dest) {
-          $dest->emit($event, $args);
-        }
+      foreach($this->forward as $dest) {
+        $dest->emit($event, $args);
       }
       return $this;
     }
