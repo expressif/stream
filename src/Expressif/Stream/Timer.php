@@ -7,7 +7,7 @@
 namespace Expressif\Stream {
 
   /**
-   * Event wrapper
+   * Timer wrapper
    */
   class Timer {
 
@@ -23,10 +23,12 @@ namespace Expressif\Stream {
       $this->interval = $interval;
       $this->event = event_timer_new();
       event_timer_set($this->event, array($this, 'tick'));
-      event_base_set($this->event, Loop::$instance->base);
-      event_add($this->event, $this->interval * 1000);
+      Loop::attachEvent($this->event, $this->interval * 1000);
     }
 
+    /**
+     * Ticks at the specified interval
+     */
     public function tick() {
       call_user_func_array($this->fn, array($this));
       if (!empty($this->event)) {
