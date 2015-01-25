@@ -32,7 +32,7 @@ namespace Expressif\Stream {
      * Free from loop
      */
     public function __destruct() {
-      if (!empty($this->buffer)) {
+      if (!empty($this->event)) {
         event_buffer_disable($this->event, EV_READ | EV_WRITE);
         event_buffer_free($this->event);
         unset($this->stream, $this->event);

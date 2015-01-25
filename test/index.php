@@ -5,8 +5,9 @@ require __DIR__ . '/../vendor/autoload.php';
 use Expressif\Stream\Loop;
 
 $buffer = Loop::buffer('tcp://173.194.66.104:80');
-$buffer->read(function($response) {
+$buffer->read(function($response) use($buffer) {
   echo '<- ' . $response;
+  $buffer->close();
 });
 $buffer->on('write', function() {
   echo "-> Request sent\n";
