@@ -84,6 +84,14 @@ namespace Expressif\Stream {
     }
 
     /**
+     * Sends some data
+     * @alias write
+     */
+    public function send($data) {
+      return $this->write($data);
+    }
+
+    /**
      * Closing the current connection
      */
     public function close() {
