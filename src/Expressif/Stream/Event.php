@@ -9,7 +9,7 @@ namespace Expressif\Stream {
   /**
    * Event wrapper
    */
-  class Event extends EventEmitter {
+  abstract class Event extends EventEmitter {
 
     protected $event;
     protected $stream;
@@ -21,9 +21,16 @@ namespace Expressif\Stream {
       $this->stream = $stream;
       stream_set_blocking($this->stream, 0);
       $this->event = event_new();
-      event_set($this->event, $this->stream, EV_READ | EV_PERSIST, array($this, 'emit'), 'read');
+      event_set($this->event, $this->stream, EV_READ | EV_PERSIST, array($this, '_trigger'));
       event_base_set($this->event, Loop::$instance->base);
       event_add($this->event);
+    }
+
+    /**
+     * Entry point for read event
+     */
+    public function _trigger() {
+      $this->emit('trigger');
     }
 
     /**
