@@ -9,7 +9,7 @@ namespace Expressif\Stream {
   /**
    * Event wrapper
    */
-  class Reader extends EventEmitter {
+  class Event extends EventEmitter {
 
     /**
      * @var boolean Indicates if you can write into the stream
